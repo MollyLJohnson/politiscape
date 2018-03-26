@@ -165,7 +165,7 @@
                 officialSocialDiv.append(website);
             } 
             else { // Different button creation process for Headlines when hidden
-                websiteBtn.addClass("headlines").attr("id", nameID)
+                websiteBtn.addClass("headlines hidden").attr("id", nameID);
                 var website = $("<a>").append(websiteBtn)
                 officialSocialDiv.append(website);
             }
@@ -176,41 +176,51 @@
     function displayHeadlines() {
 
         var headlinesDivID = $(this).attr('id') + "headlines" // Grabs the ID of the specific button clicked
+        
+        if ($(this).hasClass('hidden')) {
+            $(this).removeClass('hidden');
+            $(this).addClass('displayed');
 
-        var cardClickedID = $(this).attr('id') // Grabs ID of specific button's card clicked so headlines div can be added to the right card
+            var cardClickedID = $(this).attr('id') // Grabs ID of specific button's card clicked so headlines div can be added to the right card
 
-        var headlinesDiv = $("<div class='text-left animated fadeInDown'>").attr("id", headlinesDivID)
-        // Creating div to hold list of headlines
+            var headlinesDiv = $("<div class='text-left animated fadeInDown'>").attr("id", headlinesDivID)
+            // Creating div to hold list of headlines
 
-        var headlinesList = $("<ul>")
-        // Creating list of headlines
+            var headlinesList = $("<ul>")
+            // Creating list of headlines
 
-        var URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a8c512eae346c58a56d7649ea2eef2";
-        URL += ('&q="' + cardClickedID + '"') //this is the ID of the card (aka the name of the official)
-        URL += "&news_desk:('Politics')&sort=newest"
+            var URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a8c512eae346c58a56d7649ea2eef2";
+            URL += ('&q="' + cardClickedID + '"') //this is the ID of the card (aka the name of the official)
+            URL += "&news_desk:('Politics')&sort=newest"
 
-        $.ajax({
-            method: "GET",
-            url: URL, 
-            success: function (response) {
-                
-                if(response.response.meta.hits === 0) {
-                    $("#" + cardClickedID).append(headlinesDiv); 
-                    // Appends the headlines div to the clicked-on card body
-                    $("#" + headlinesDivID).html("<p>Sorry, New York Times doesn't seem to have any articles relating to this person.</p>"); 
-                    // Appends error message to the newly created headlinesDiv
-                }
-                else {
-                    for (var i = 0; i < response.response.docs.length; i++) {
-                        if (i < 3) {
-                        headlinesList.append("<li><a target='_blank' href='" + response.response.docs[i].web_url + "'>" + response.response.docs[i].headline.main + "</a><br>")
-                        }
+            $.ajax({
+                method: "GET",
+                url: URL, 
+                success: function (response) {
+
+                    if(response.response.meta.hits === 0) {
+                        $("#" + cardClickedID).append(headlinesDiv); 
+                        // Appends the headlines div to the clicked-on card body
+                        $("#" + headlinesDivID).html("<p>Sorry, New York Times doesn't seem to have any articles relating to this person.</p>"); 
+                        // Appends error message to the newly created headlinesDiv
                     }
-                    $("#" + cardClickedID).append(headlinesDiv) //Appends the headlines div to the clicked-on card body
-                    $("#" + headlinesDivID).html(headlinesList) // Appends headlines to the newly created headlinesDiv
+                    else {
+                        for (var i = 0; i < response.response.docs.length; i++) {
+                            if (i < 3) {
+                            headlinesList.append("<li><a target='_blank' href='" + response.response.docs[i].web_url + "'>" + response.response.docs[i].headline.main + "</a><br>")
+                            }
+                        }
+                        $("#" + cardClickedID).append(headlinesDiv) //Appends the headlines div to the clicked-on card body
+                        $("#" + headlinesDivID).html(headlinesList) // Appends headlines to the newly created headlinesDiv
+                    }
                 }
-            }
-        })
-//            $("#" + headlinesDivID).remove() //removing div so official card goes back to original formatting
+            })
+        }
+        else {
+            $(this).removeClass('displayed');
+            $(this).addClass('hidden');
+            
+            $("#" + headlinesDivID).remove();
+        }
     }
 })();
