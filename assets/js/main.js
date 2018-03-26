@@ -201,7 +201,7 @@
                     if(response.response.meta.hits === 0) {
                         $("#" + cardClickedID).append(headlinesDiv); 
                         // Appends the headlines div to the clicked-on card body
-                        $("#" + headlinesDivID).html("<p>Sorry, New York Times doesn't seem to have any articles relating to this person.</p>"); 
+                        $("#" + headlinesDivID).html("<br><p>Sorry, New York Times doesn't seem to have any articles relating to this person.</p>"); 
                         // Appends error message to the newly created headlinesDiv
                     }
                     else {
