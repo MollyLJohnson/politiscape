@@ -87,8 +87,8 @@
                         // creates a newOfficial variable with a class profile-card
                         var wrapper = $("<div class='imgwrapper'>");
                         // adds a div with a class imgwrapper and an id with the officials name
-                        var officialPhoto = $("<img class='card-img-top img-fluid img-responsive profile-img'>").attr("src", photoSrc);
-                        // adds a img with a class card-img-top img-fluid img-responsive profile-img and sets the source to the officials photo from the civic information api
+                        var officialPhoto = $("<img class='card-img-top img-fluid profile-img'>").attr("src", photoSrc);
+                        // adds a img with a class card-img-top img-fluid profile-img and sets the source to the officials photo from the civic information api
                         var officialBody = $("<div class='card-body text-center'>").attr("id", nameID);
                         // adds a div with a class card-body text-center for formatting and adds an id name to the official body so that headlines can be appended to correct place
                         var officialName = $("<h5 class='card-title'>").text(name);
@@ -116,6 +116,11 @@
                         newOfficial.append(wrapper)
                             .append(officialBody);
                         //adds the wrapper with the image and the officialBody to the newOfficial
+                        
+                        $(".scrolling-profiles").addClass("col-sm-8")
+                            .addClass("col-md-7")
+                            .addClass("col-lg-6")
+                            .addClass("col-xl-5");
 
                         $(".scrolling-profiles").append(newOfficial);
                         // dynamically creates new cards with each official's data
@@ -160,7 +165,7 @@
                 officialSocialDiv.append(website);
             } 
             else { // Different button creation process for Headlines when hidden
-                websiteBtn.addClass("headlines hidden").attr("id", nameID)
+                websiteBtn.addClass("headlines").attr("id", nameID)
                 var website = $("<a>").append(websiteBtn)
                 officialSocialDiv.append(website);
             }
@@ -172,38 +177,40 @@
 
         var headlinesDivID = $(this).attr('id') + "headlines" // Grabs the ID of the specific button clicked
 
-        if ($(this).hasClass('hidden')) { // ******Checks to see if Headlines button has class 'hidden' or 'displayed' 
-            $(this).removeClass('hidden')
-            $(this).addClass('displayed') //********hides or displays the headlines for each card appropriately
+        var cardClickedID = $(this).attr('id') // Grabs ID of specific button's card clicked so headlines div can be added to the right card
 
-            var cardClickedID = $(this).attr('id') // Grabs ID of specific button's card clicked so headlines div can be added to the right card
+        var headlinesDiv = $("<div class='text-left animated fadeInDown'>").attr("id", headlinesDivID)
+        // Creating div to hold list of headlines
 
-            var headlinesDiv = $("<div class='text-left displayed animated fadeInDown'>").attr("id", headlinesDivID)
-            // Creating div to hold list of headlines
+        var headlinesList = $("<ul>")
+        // Creating list of headlines
 
-            var headlinesList = $("<ul>")
-            // Creating list of headlines
+        var URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a8c512eae346c58a56d7649ea2eef2";
+        URL += ('&q="' + cardClickedID + '"') //this is the ID of the card (aka the name of the official)
+        URL += "&news_desk:('Politics')&sort=newest"
 
-            var URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a8c512eae346c58a56d7649ea2eef2";
-            URL += ('&q="' + cardClickedID + '"') //this is the ID of the card (aka the name of the official)
-            URL += "&news_desk:('Politics')&sort=newest"
-
-            $.get(URL)
-                .then(function (response) {
-                    
-                    for (var i = 0; i < 3; i++) {
+        $.ajax({
+            method: "GET",
+            url: URL, 
+            success: function (response) {
+                
+                if(response.response.meta.hits === 0) {
+                    $("#" + cardClickedID).append(headlinesDiv); 
+                    // Appends the headlines div to the clicked-on card body
+                    $("#" + headlinesDivID).html("<p>Sorry, New York Times doesn't seem to have any articles relating to this person.</p>"); 
+                    // Appends error message to the newly created headlinesDiv
+                }
+                else {
+                    for (var i = 0; i < response.response.docs.length; i++) {
+                        if (i < 3) {
                         headlinesList.append("<li><a target='_blank' href='" + response.response.docs[i].web_url + "'>" + response.response.docs[i].headline.main + "</a><br>")
+                        }
                     }
-                })
-
-            $("#" + cardClickedID).append(headlinesDiv) //Appends the headlines div to the clicked-on card body
-            $("#" + headlinesDivID).html(headlinesList) // Appends headlines to the newly created headlinesDiv
-        } 
-        else {
-            $(this).removeClass('displayed') //removing displayed to show headlines are now hidden
-            $(this).addClass('hidden')
-
-            $("#" + headlinesDivID).remove() //removing div so official card goes back to original formatting
-        }
+                    $("#" + cardClickedID).append(headlinesDiv) //Appends the headlines div to the clicked-on card body
+                    $("#" + headlinesDivID).html(headlinesList) // Appends headlines to the newly created headlinesDiv
+                }
+            }
+        })
+//            $("#" + headlinesDivID).remove() //removing div so official card goes back to original formatting
     }
 })();
